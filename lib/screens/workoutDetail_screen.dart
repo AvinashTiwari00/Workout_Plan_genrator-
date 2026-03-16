@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:college_project/models/workout_plan.dart';
+import 'package:college_project/widgets/exercise_tile.dart';
 
 class WorkoutDetailScreen extends StatelessWidget {
   final String workoutName;
@@ -46,62 +47,9 @@ class WorkoutDetailScreen extends StatelessWidget {
               child: ListView.builder(
                 itemCount: exercises.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.shade300,
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        // Left side details
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                exercises[index].name,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                "${exercises[index].sets} sets • ${exercises[index].reps} reps",
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        // Right side — Image
-                        Container(
-                          height: 70,
-                          width: 90,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: AssetImage("assets/images/ex_${index + 1}.png"),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  return ExerciseTile(
+                    exercise: exercises[index],
+                    index: index,
                   );
                 },
               ),
