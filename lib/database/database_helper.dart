@@ -29,6 +29,8 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE users (
         id INTEGER PRIMARY KEY,
+        name TEXT,
+        password TEXT,
         age INTEGER,
         height REAL,
         weight REAL,
@@ -79,6 +81,40 @@ class DatabaseHelper {
       return res.first;
     }
     return null;
+  }
+
+  Future<int> createUser(Map<String, dynamic> user) async {
+    final db = await database;
+    return await db.insert(
+      'users',
+      user,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Map<String, dynamic>?> loginUser(
+      String name, String password) async {
+    final db = await database;
+    final res = await db.query(
+      'users',
+      where: 'name = ? AND password = ?',
+      whereArgs: [name, password],
+      limit: 1,
+    );
+    if (res.isNotEmpty) {
+      return res.first;
+    }
+    return null;
+  }
+
+  Future<bool> userExists() async {
+    final db = await database;
+    final res = await db.rawQuery('SELECT COUNT(*) as count FROM users');
+    if (res.isNotEmpty) {
+      final count = res.first['count'] as int? ?? 0;
+      return count > 0;
+    }
+    return false;
   }
 
   // -------------------- WORKOUT HISTORY CRUD --------------------

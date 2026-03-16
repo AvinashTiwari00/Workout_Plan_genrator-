@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:college_project/models/user_models.dart';
-import 'package:college_project/widgets/weekly_progress_header_card.dart';
-import 'package:college_project/widgets/weekly_daily_activity_tile.dart';
 
 class WeeklyProgressScreen extends StatelessWidget {
   final User user;
@@ -26,7 +24,48 @@ class WeeklyProgressScreen extends StatelessWidget {
           children: [
 
             // --------------------------------- HEADER SUMMARY CARD ---------------------------------
-            WeeklyProgressHeaderCard(completedDays: completedDays),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade600, Colors.blue.shade900],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.shade200.withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "This Week's Score",
+                    style: TextStyle(color: Colors.white70, fontSize: 15),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "$completedDays / 7 Days Completed 🎯",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 23,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  LinearProgressIndicator(
+                    value: completedDays / 7,
+                    backgroundColor: Colors.white24,
+                    color: Colors.white,
+                    minHeight: 9,
+                  ),
+                ],
+              ),
+            ),
 
             const SizedBox(height: 30),
 
@@ -38,9 +77,45 @@ class WeeklyProgressScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             ...user.weeklyProgress.entries.map((e) {
-              return WeeklyDailyActivityTile(
-                dayLabel: e.key,
-                value: e.value,
+              final bool isCompleted = e.value == 1;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: isCompleted ? Colors.green.shade100 : Colors.grey.shade200,
+                      child: Icon(
+                        isCompleted ? Icons.check : Icons.close,
+                        color: isCompleted ? Colors.green.shade600 : Colors.red.shade400,
+                      ),
+                    ),
+                    const SizedBox(width: 15),
+                    Text(
+                      e.key,
+                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      width: 150,
+                      child: LinearProgressIndicator(
+                        value: e.value.toDouble(),
+                        color: isCompleted ? Colors.green.shade600 : Colors.grey.shade400,
+                        backgroundColor: Colors.grey.shade200,
+                        minHeight: 8,
+                      ),
+                    ),
+                  ],
+                ),
               );
             }).toList(),
 

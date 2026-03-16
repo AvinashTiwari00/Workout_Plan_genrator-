@@ -1,7 +1,5 @@
 import 'package:college_project/models/user_models.dart';
 import 'package:college_project/models/workout_plan.dart';
-import 'package:provider/provider.dart';
-import 'package:college_project/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 
 class UserInputScreen extends StatefulWidget {
@@ -72,12 +70,7 @@ class _UserInputScreenState extends State<UserInputScreen> {
         },
         goal: _getGoal(goal),
       );
-
-      // Store user in Provider
-      context.read<UserProvider>().setUser(newUser);
-
-      // Navigate without passing user directly
-      Navigator.pushNamed(context, '/dashboard');
+      Navigator.pushNamed(context, '/dashboard', arguments: newUser);
     }
   }
 

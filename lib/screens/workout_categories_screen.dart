@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:college_project/models/menu_item.dart';
 import 'package:college_project/models/user_models.dart';
+import 'package:college_project/services/workout_plan_service.dart';
 import 'package:college_project/models/workout_plan.dart';
-import 'package:college_project/providers/user_provider.dart';
-import 'package:college_project/providers/workout_provider.dart';
 
 class WorkoutCategoriesScreen extends StatelessWidget {
   const WorkoutCategoriesScreen({super.key});
 
-  List<MenuItem> _getMenuItems(WorkoutPlan plan) {
+  List<MenuItem> _getMenuItems(User user) {
+    final plan = WorkoutPlanService().generatePlan(user.goal);
     
     final Map<String, String> imageAssets = {
       "Chest": "https://cdn.iconscout.com/icon/premium/png-256-thumb/chest-muscle-icon-svg-download-png-7077023.png",
@@ -53,16 +52,8 @@ class WorkoutCategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>().user;
-    final workoutProvider = context.watch<WorkoutProvider>();
-
-    // Ensure we have a plan generated for current user goal
-    if (user != null && workoutProvider.currentPlan == null) {
-      workoutProvider.generatePlan(user.goal);
-    }
-
-    final plan = workoutProvider.currentPlan;
-    final menuItems = plan != null ? _getMenuItems(plan) : <MenuItem>[];
+    final user = ModalRoute.of(context)!.settings.arguments as User;
+    final menuItems = _getMenuItems(user);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F7FF),
