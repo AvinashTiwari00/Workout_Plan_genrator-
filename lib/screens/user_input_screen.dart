@@ -1,6 +1,7 @@
 import 'package:college_project/models/user_models.dart';
 import 'package:college_project/models/workout_plan.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class UserInputScreen extends StatefulWidget {
   const UserInputScreen({super.key});
@@ -42,11 +43,66 @@ class _UserInputScreenState extends State<UserInputScreen> {
 
   void _validateForm() {
     setState(() {
-      _isFormValid = nameCtrl.text.isNotEmpty &&
-          ageCtrl.text.isNotEmpty &&
-          weightCtrl.text.isNotEmpty &&
-          heightCtrl.text.isNotEmpty;
+      _isFormValid = _isNameValid(nameCtrl.text) &&
+          _isAgeValid(ageCtrl.text) &&
+          _isWeightValid(weightCtrl.text) &&
+          _isHeightValid(heightCtrl.text);
     });
+  }
+
+  bool _isNameValid(String raw) {
+    final t = raw.trim();
+    if (t.isEmpty) return false;
+    return !RegExp(r'[0-9]').hasMatch(t);
+  }
+
+  bool _isAgeValid(String raw) {
+    final n = int.tryParse(raw.trim());
+    return n != null && n >= 1 && n <= 120;
+  }
+
+  bool _isWeightValid(String raw) {
+    final d = double.tryParse(raw.trim());
+    return d != null && d > 0 && d <= 500;
+  }
+
+  bool _isHeightValid(String raw) {
+    final d = double.tryParse(raw.trim());
+    return d != null && d > 0 && d <= 300;
+  }
+
+  String? _validateName(String? v) {
+    final t = v?.trim() ?? '';
+    if (t.isEmpty) return 'Enter your name';
+    if (RegExp(r'[0-9]').hasMatch(t)) return 'Name cannot contain numbers';
+    return null;
+  }
+
+  String? _validateAge(String? v) {
+    final t = v?.trim() ?? '';
+    if (t.isEmpty) return 'Enter your age';
+    final n = int.tryParse(t);
+    if (n == null) return 'Age must be a whole number';
+    if (n < 1 || n > 120) return 'Enter a realistic age (1–120)';
+    return null;
+  }
+
+  String? _validateWeight(String? v) {
+    final t = v?.trim() ?? '';
+    if (t.isEmpty) return 'Enter your weight';
+    final d = double.tryParse(t);
+    if (d == null) return 'Use numbers only (e.g. 70 or 70.5)';
+    if (d <= 0 || d > 500) return 'Enter weight between 1 and 500 kg';
+    return null;
+  }
+
+  String? _validateHeight(String? v) {
+    final t = v?.trim() ?? '';
+    if (t.isEmpty) return 'Enter your height';
+    final d = double.tryParse(t);
+    if (d == null) return 'Use numbers only (e.g. 175 or 175.5)';
+    if (d <= 0 || d > 300) return 'Enter height between 1 and 300 cm';
+    return null;
   }
 
   void _submit() {
@@ -220,30 +276,96 @@ class _UserInputScreenState extends State<UserInputScreen> {
       ),
       child: Column(
         children: [
-          _buildInput("Full Name", nameCtrl, Icons.person),
+          _buildInput(
+            "Full Name",
+            nameCtrl,
+            Icons.person,
+            inputFormatters: [
+              FilteringTextInputFormatter.deny(RegExp(r'[0-9]')),
+            ],
+            fieldValidator: _validateName,
+          ),
           const SizedBox(height: 16),
           if (isWeb)
             Row(
               children: [
-                Expanded(child: _buildInput("Age", ageCtrl, Icons.cake, type: TextInputType.number)),
+                Expanded(
+                  child: _buildInput(
+                    "Age",
+                    ageCtrl,
+                    Icons.cake,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(3),
+                    ],
+                    fieldValidator: _validateAge,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: _buildInput("Weight (kg)", weightCtrl, Icons.monitor_weight, type: TextInputType.number)),
+                Expanded(
+                  child: _buildInput(
+                    "Weight (kg)",
+                    weightCtrl,
+                    Icons.monitor_weight,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [_DecimalTextInputFormatter()],
+                    fieldValidator: _validateWeight,
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: _buildInput("Height (cm)", heightCtrl, Icons.height, type: TextInputType.number)),
+                Expanded(
+                  child: _buildInput(
+                    "Height (cm)",
+                    heightCtrl,
+                    Icons.height,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [_DecimalTextInputFormatter()],
+                    fieldValidator: _validateHeight,
+                  ),
+                ),
               ],
             )
-          else 
+          else
             Column(
               children: [
-                 _buildInput("Age", ageCtrl, Icons.cake, type: TextInputType.number),
-                 const SizedBox(height: 16),
-                 Row(
-                   children: [
-                     Expanded(child: _buildInput("Weight (kg)", weightCtrl, Icons.monitor_weight, type: TextInputType.number)),
-                     const SizedBox(width: 12),
-                     Expanded(child: _buildInput("Height (cm)", heightCtrl, Icons.height, type: TextInputType.number)),
-                   ],
-                 )
+                _buildInput(
+                  "Age",
+                  ageCtrl,
+                  Icons.cake,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(3),
+                  ],
+                  fieldValidator: _validateAge,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildInput(
+                        "Weight (kg)",
+                        weightCtrl,
+                        Icons.monitor_weight,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [_DecimalTextInputFormatter()],
+                        fieldValidator: _validateWeight,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildInput(
+                        "Height (cm)",
+                        heightCtrl,
+                        Icons.height,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [_DecimalTextInputFormatter()],
+                        fieldValidator: _validateHeight,
+                      ),
+                    ),
+                  ],
+                )
               ],
             ),
         ],
@@ -251,11 +373,19 @@ class _UserInputScreenState extends State<UserInputScreen> {
     );
   }
 
-  Widget _buildInput(String label, TextEditingController ctrl, IconData icon, {TextInputType type = TextInputType.text}) {
+  Widget _buildInput(
+    String label,
+    TextEditingController ctrl,
+    IconData icon, {
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    FormFieldValidator<String>? fieldValidator,
+  }) {
     return TextFormField(
       controller: ctrl,
-      keyboardType: type,
-      validator: (v) => v!.isEmpty ? "Required" : null,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      validator: fieldValidator ?? (v) => (v == null || v.isEmpty) ? 'Required' : null,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: Colors.blue.shade700, size: 20),
@@ -425,5 +555,19 @@ class _UserInputScreenState extends State<UserInputScreen> {
       case "Stay Fit": return UserGoal.maintenance;
       default: return UserGoal.muscleGain;
     }
+  }
+}
+
+/// Allows digits and at most one decimal point (e.g. 70, 70.5).
+class _DecimalTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final t = newValue.text;
+    if (t.isEmpty) return newValue;
+    if (RegExp(r'^\d*\.?\d*$').hasMatch(t)) return newValue;
+    return oldValue;
   }
 }
